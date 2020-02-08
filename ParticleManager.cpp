@@ -128,10 +128,15 @@ void ParticleManager::Render()
 		auto pParticle = m_vParticleList[iParticleIndex];
 		
 		//Set MVP in Vertex Shader
-		glm::mat4 matModel = glm::mat4(1.0f);
+		float fTransX = (rand() % 3)  + 1;
+		float fTransY = (rand() % 10) + 1;
+		float fTransZ = (rand() % 5) + 1;
+		glm::mat4 matModel = glm::translate(glm::mat4(1.0f), glm::vec3(fTransX, fTransY, fTransZ));
+		//glm::mat4 matModel = glm::mat4(1.0f);
+		
 		glm::mat4 MVP = m_matProj * m_matView *  matModel;
-
-
+		
+		
 		glm::vec3 vColor = pParticle->GetColor();
 		glUniform3f(m_ColorID, vColor.r, vColor.g, vColor.b);
 		glUniformMatrix4fv(m_MatrixMVPID, 1, GL_FALSE, &MVP[0][0]);
