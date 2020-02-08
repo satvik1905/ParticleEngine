@@ -1,6 +1,8 @@
 #pragma once
 #define GLEW_STATIC
 #include "GL/glew.h"
+#include <glm/glm.hpp>
+//using namespace glm;
 
 class Particle
 {
@@ -13,12 +15,15 @@ class Particle
 	//Radius of Particle : Since Rectangle is the shape of particle so radius represent 
 	GLfloat			m_fRadius;
 
+	glm::vec3		m_vColor;
+
 public:
 	Particle(float _fCenterX, float _fCenterY, float _fCenterZ);
 	~Particle();
 
-	GLuint GetVertexBuffer();
-	GLuint GetVertexCount();
-	void Release();	
+	GLuint		GetVertexBuffer();
+	GLuint		GetVertexCount();
+	glm::vec3	GetColor();
+	void		Release();	
 };
 

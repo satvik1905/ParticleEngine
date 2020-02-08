@@ -84,7 +84,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>.\Dependency\glfw\include;.\Dependency\glew-2.1.0\include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\Dependency\glfw\include;.\Dependency\glew-2.1.0\include\;.\Dependency\glm</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>.\Dependency\glfw\lib-vc2017;.\Dependency\glfw\lib-vc2019;.\Dependency\glew-2.1.0\lib\Release\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>

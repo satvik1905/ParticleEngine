@@ -5,10 +5,6 @@
 #include <sstream>
 #include <time.h> //For Random Number Generator
 
-//// Include GLM
-//#include <glm/glm.hpp>
-//#include <glm/gtc/matrix_transform.hpp>
-//using namespace glm;
 
 bool ParticleManager::IntializeShader()
 {
@@ -89,7 +85,10 @@ bool ParticleManager::IntializeShader()
 	}
 
 	// Get a handle for our "Color" uniform
-	m_ParticleColorID = glGetUniformLocation(m_ShaderId, "ParticleColor");
+	m_ColorID = glGetUniformLocation(m_ShaderId, "ParticleColor");
+
+	// Get a handle for our "MVP" uniform
+	m_MatrixMVPID = glGetUniformLocation(m_ShaderId, "MVP");
 
 	// delete the shaders as they're linked into our program now and no longer necessery
 	glDeleteShader(vertexShaderId);
@@ -103,6 +102,14 @@ ParticleManager::ParticleManager()
 	/* initialize random seed: */
 	//Only Once : Random Value Use to Generate Particle Position
 	srand(time(NULL)); 
+
+	//Set View Matrix
+	glm::vec3 vCameraPos = glm::vec3(4, 3, 3);
+	glm::vec3 vCameraDir = glm::vec3(0, 0, 0);
+	glm::vec3 vUp		 = glm::vec3(0, 1, 0);
+	m_matView = glm::lookAt(vCameraPos, vCameraDir, vUp);
+
+	m_matProj = glm::perspective(glm::radians(60.0f), 600.0f/400.0f, 0.1f, 100.0f);
 }
 
 
@@ -113,11 +120,21 @@ ParticleManager::~ParticleManager()
 void ParticleManager::Render()
 {
 	glUseProgram(m_ShaderId);
-//	glUniform3f(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+	
+	//glUniform3f(m_ParticleColorID, (double)rand() / (RAND_MAX), (double)rand() / (RAND_MAX), (double)rand() / (RAND_MAX));
 	glEnableVertexAttribArray(0);
 	for (unsigned int iParticleIndex = 0; iParticleIndex < m_vParticleList.size(); iParticleIndex++)
 	{
 		auto pParticle = m_vParticleList[iParticleIndex];
+		
+		//Set MVP in Vertex Shader
+		glm::mat4 matModel = glm::mat4(1.0f);
+		glm::mat4 MVP = m_matProj * m_matView *  matModel;
+
+
+		glm::vec3 vColor = pParticle->GetColor();
+		glUniform3f(m_ColorID, vColor.r, vColor.g, vColor.b);
+		glUniformMatrix4fv(m_MatrixMVPID, 1, GL_FALSE, &MVP[0][0]);
 		
 		//Render		
 		glBindBuffer(GL_ARRAY_BUFFER, pParticle->GetVertexBuffer());
@@ -132,13 +149,13 @@ bool ParticleManager::InitializeManager()
 {	
 	if (IntializeShader())
 	{
-		//Add 100 Particle
-		for (unsigned int i = 0; i < 100; i++)
+		//Add 1000 Particle
+		for (unsigned int i = 0; i < 1000; i++)
 		{	
-			float randomX =  ((double)rand()  / (RAND_MAX));
-			float randomY =  ((double)rand()  / (RAND_MAX));
-			float randomZ =  ((double)rand()  / (RAND_MAX));
-			m_vParticleList.push_back(new Particle(randomX, randomY, randomZ));
+			float fPosX =  ((double)rand()  / (RAND_MAX));
+			float fPosY =  ((double)rand()  / (RAND_MAX));
+			float fPosZ =  ((double)rand()  / (RAND_MAX));
+			m_vParticleList.push_back(new Particle(fPosX, fPosY, fPosZ));
 		}
 		return true;
 	}	
