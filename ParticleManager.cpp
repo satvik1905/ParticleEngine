@@ -101,7 +101,7 @@ bool ParticleManager::IntializeShader()
 ParticleManager::ParticleManager()
 {
 	/* initialize random seed: */
-	//Only Once
+	//Only Once : Random Value Use to Generate Particle Position
 	srand(time(NULL)); 
 }
 
