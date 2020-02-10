@@ -114,7 +114,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>.\Dependency\glfw\include;.\Dependency\glew-2.1.0\include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\Dependency\glfw\include;.\Dependency\glew-2.1.0\include\;.\Dependency\glm</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

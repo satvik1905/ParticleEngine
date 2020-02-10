@@ -24,15 +24,17 @@ int main()
 		return 0;
 		
 	
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+
 	//Infinite Loop
 	while (!glfwWindowShouldClose(pWindow->GetWindowHandle()))
 	{
 		if (glfwGetKey(pWindow->GetWindowHandle(), GLFW_KEY_ESCAPE) == GLFW_PRESS)
 			glfwSetWindowShouldClose(pWindow->GetWindowHandle(), true);
-
-	
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+					
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 				
 		pParticleManager->Render();
 		

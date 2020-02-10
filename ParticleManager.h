@@ -9,18 +9,25 @@ using namespace glm;
 
 
 
-class Particle;
+class Particle; //Class Forward Defination to Save Compile Time
 class ParticleManager
 {	
-	std::vector<Particle *> m_vParticleList;
+	//std::vector< GLuint >		m_vTextureIDList;
+	std::vector<Particle *>		m_vParticleList;
 	glm::mat4	m_matView, m_matProj;
 	
 
 private :
-	bool IntializeShader();
-	GLuint m_ShaderId;
-	GLuint m_ColorID;
-	GLuint m_MatrixMVPID;
+	bool		IntializeShader();
+	GLuint		LoadTexture(const char *_pFilePath);
+	
+	//Shader References
+	GLuint		m_ShaderId;
+	GLuint		m_ColorID;
+	GLuint		m_MatrixMVPID;
+	GLuint		m_TextureID;
+
+	GLuint		m_Texture;
 
 public:
 	ParticleManager();

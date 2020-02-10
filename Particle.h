@@ -7,7 +7,7 @@
 class Particle
 {
 	//Vertex Buffer
-	GLuint			m_VB; 
+	GLuint			m_VB, m_TextureUVBuffer; 
 
 	//No of Vertices to form the One Particle
 	GLuint			m_VertexCount;
@@ -21,6 +21,7 @@ public:
 	Particle(float _fCenterX, float _fCenterY, float _fCenterZ);
 	~Particle();
 
+	GLuint		GetTextureUVBuffer();
 	GLuint		GetVertexBuffer();
 	GLuint		GetVertexCount();
 	glm::vec3	GetColor();
