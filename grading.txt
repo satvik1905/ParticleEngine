@@ -1,1 +1,8 @@
-1- Created Small Particle(rectangle)
+Primary Goal
+1- Adding 1000 Particle at random Position
+	A-) Particle is made of four vertices of Rectangle
+	B-) Mapped the Texture Coordinate
+	
+2- Animation : Constantly increase the size of Particle and swapping the texture 
+
+3- Load Two Textures : During Rendering of Particle, swapping the texture

@@ -15,7 +15,5 @@ uniform vec3 ParticleColor;
 
 void main()
 {	
-	//color = ParticleColor;//vec3(0,0,1);
-	vec4 ParicleClr = vec4(ParticleColor.r, ParticleColor.g, ParticleColor.b, 0.0f);
-	PixelColor = texture( ParticleTexture, UV ) + ParicleClr;		
+	PixelColor = texture( ParticleTexture, UV );
 }
