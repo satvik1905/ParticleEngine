@@ -5,6 +5,7 @@
 #include <sstream>
 #include <time.h> //For Random Number Generator
 
+#include "GLFW/glfw3.h"
 
 #define FOURCC_DXT1 0x31545844 // Equivalent to "DXT1" in ASCII
 #define FOURCC_DXT3 0x33545844 // Equivalent to "DXT3" in ASCII
@@ -172,6 +173,11 @@ GLuint ParticleManager::LoadTexture(const char * _pFilePath)
 	glBindTexture(GL_TEXTURE_2D, textureID);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
 	unsigned int blockSize = (format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16;
 	unsigned int offset = 0;
 
@@ -179,8 +185,7 @@ GLuint ParticleManager::LoadTexture(const char * _pFilePath)
 	for (unsigned int level = 0; level < mipMapCount && (width || height); ++level)
 	{
 		unsigned int size = ((width + 3) / 4)*((height + 3) / 4)*blockSize;
-		glCompressedTexImage2D(GL_TEXTURE_2D, level, format, width, height,
-			0, size, buffer + offset);
+		glCompressedTexImage2D(GL_TEXTURE_2D, level, format, width, height,	0, size, buffer + offset);
 
 		offset += size;
 		width /= 2;
@@ -211,8 +216,12 @@ ParticleManager::ParticleManager()
 	glm::vec3 vUp		 = glm::vec3(0, 1, 0);
 	m_matView = glm::lookAt(vCameraPos, vCameraDir, vUp);
 
+	
+	int count = 0;
+	const GLFWvidmode *pScreen = glfwGetVideoModes(glfwGetPrimaryMonitor(), &count);
+	float fAspectRatio = (float) pScreen->width / (float)pScreen->height;
 	//Set Projection Matrix
-	m_matProj = glm::perspective(glm::radians(60.0f), 4.0f/3.0f, 0.1f, 10000.0f);
+	m_matProj = glm::perspective(glm::radians(60.0f), fAspectRatio, 0.1f, 10000.0f);
 }
 
 
@@ -222,32 +231,41 @@ ParticleManager::~ParticleManager()
 }
 
 void ParticleManager::Render()
-
 {	
-	
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glUseProgram(m_ShaderId);
 	for (unsigned int iParticleIndex = 0; iParticleIndex < m_vParticleList.size(); iParticleIndex++)
 	{
 		auto pParticle = m_vParticleList[iParticleIndex];
 		
-		glUseProgram(m_ShaderId);
-		//Set MVP in Vertex Shader
-		float fTransX = (rand() % 20)  + 1;
-		float fTransY = (rand() % 10) + 1;
-		float fTransZ = (rand() % 5) + 1;
-		//glm::mat4 matModel = glm::translate(glm::mat4(1.0f), glm::vec3(fTransX, fTransY, fTransZ));
-		glm::mat4 matModel = glm::mat4(1.0f);
-		//glm::mat4 matScale = glm::scale(glm::mat4(1.0f), glm::vec3(10, 10, 1));
+		auto vPos = pParticle->GetPosition();
 
-		glm::mat4 MVP = m_matProj * m_matView *  matModel;/**  matModel;*/ ///*matScale;
+		
+		//Set MVP in Vertex Shader
+		float fTransX = (rand() % 20)  + (-10);
+		float fTransY = (rand() % 10) + (-5);
+		float fTransZ = (rand() % 5) + 1;
+		glm::mat4 matModel = glm::translate(glm::mat4(1.0f), glm::vec3(vPos.x, vPos.y, vPos.z));
+		//glm::mat4 matModel = glm::mat4(1.0f);
+		glm::mat4 matScale = glm::scale(matModel, glm::vec3(fTransZ, fTransZ, 1));
+
+		glm::mat4 MVP = m_matProj * m_matView * matScale;/**  matModel;*/ ///*matScale;
 		glm::vec3 vColor = pParticle->GetColor();
 		glUniform3f(m_ColorID, vColor.r, vColor.g, vColor.b);
 		glUniformMatrix4fv(m_MatrixMVPID, 1, GL_FALSE, &MVP[0][0]);
 		
+		int iSelectedTexture = rand() % 2 + 1;
+
 		//Set Texture
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, m_Texture);		
+		if(iSelectedTexture == 1)
+			glBindTexture(GL_TEXTURE_2D, m_Texture1);		
+		else
+			glBindTexture(GL_TEXTURE_2D, m_Texture2);
 		glUniform1i(m_TextureID, 0);
-				
+			
 		//1 - Set verticex buffer
 		glEnableVertexAttribArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, pParticle->GetVertexBuffer());
@@ -269,19 +287,21 @@ void ParticleManager::Render()
 
 bool ParticleManager::InitializeManager()
 {	
+	//Intialize Shader
 	if (IntializeShader())
 	{
 		//Add 1000 Particle
-		for (unsigned int i = 0; i < 1; i++)
+		for (unsigned int i = 0; i < 1000; i++)
 		{	
-			float fPosX =  ((double)rand()  / (RAND_MAX));
-			float fPosY =  ((double)rand()  / (RAND_MAX));
-			float fPosZ =  ((double)rand()  / (RAND_MAX));
+			float fPosX = ((double)rand() / (RAND_MAX)) + (rand()  % (10) + (-5));
+			float fPosY = ((double)rand() / (RAND_MAX)) + (rand() % (10) + (-5));
+			float fPosZ = 0;
 			m_vParticleList.push_back(new Particle(fPosX, fPosY, fPosZ));
 		}
 
 		//LoadTexture		
-		m_Texture = LoadTexture(".\\Data\\Textures\\test-dxt5.dds");
+		m_Texture1 = LoadTexture(".\\Data\\Textures\\fire.dds");
+		m_Texture2 = LoadTexture(".\\Data\\Textures\\smoke.dds");
 		
 		return true;
 	}	
@@ -299,7 +319,8 @@ void ParticleManager::Release()
 
 	//Delete Shader
 	glDeleteProgram(m_ShaderId);	
-	glDeleteTextures(1, &m_Texture);
+	glDeleteTextures(1, &m_Texture1);
+	glDeleteTextures(1, &m_Texture2);
 	glDeleteVertexArrays(1, &m_TextureID);
 
 }

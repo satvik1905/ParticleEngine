@@ -1,20 +1,20 @@
 #include "Particle.h"
 
 Particle::Particle(float _fCenterX, float _fCenterY, float _fCenterZ)
-	//:m_fRadius(0.0125f)
-	:m_fRadius(1.0f)
+	:m_fRadius(0.0125f)
+	//:m_fRadius(1.0f)
 {
 	const GLfloat pVertices[] = 
 	{
 		//First Triangle
-		 _fCenterX - m_fRadius,  _fCenterY - m_fRadius, _fCenterZ,
-		 _fCenterX + m_fRadius,  _fCenterY - m_fRadius, _fCenterZ,
-		 _fCenterX + m_fRadius,  _fCenterY + m_fRadius, _fCenterZ,
+		  - m_fRadius,   - m_fRadius, 0,
+		  + m_fRadius,   - m_fRadius, 0,
+		  + m_fRadius,   + m_fRadius, 0,
 
 		 //Second Triangle
-		 _fCenterX + m_fRadius,  _fCenterY + m_fRadius, _fCenterZ,
-		 _fCenterX - m_fRadius,  _fCenterY + m_fRadius, _fCenterZ,
-		 _fCenterX - m_fRadius,  _fCenterY - m_fRadius, _fCenterZ,
+		  + m_fRadius,   + m_fRadius, 0,
+		  - m_fRadius,   + m_fRadius, 0,
+		  - m_fRadius,   - m_fRadius, 0,
 	};
 	m_VertexCount = 6;
 
@@ -44,7 +44,7 @@ Particle::Particle(float _fCenterX, float _fCenterY, float _fCenterZ)
 	glBindBuffer(GL_ARRAY_BUFFER, m_TextureUVBuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(pTextureUV), pTextureUV, GL_STATIC_DRAW);
 
-
+	m_vPos = glm::vec3(_fCenterX, _fCenterY, _fCenterZ);
 }
 
 Particle::~Particle()
@@ -69,6 +69,11 @@ GLuint Particle::GetVertexCount()
 glm::vec3 Particle::GetColor()
 {
 	return m_vColor;
+}
+
+glm::vec3 Particle::GetPosition()
+{
+	return m_vPos;
 }
 
 void Particle::Release()

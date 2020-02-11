@@ -27,7 +27,7 @@ private :
 	GLuint		m_MatrixMVPID;
 	GLuint		m_TextureID;
 
-	GLuint		m_Texture;
+	GLuint		m_Texture1, m_Texture2;
 
 public:
 	ParticleManager();

@@ -4,7 +4,7 @@
 in vec2 UV;
 
 // Ouput data
-out vec3 color;
+out vec4 PixelColor;
 
 
 // Values that stay constant for the whole mesh.
@@ -14,10 +14,8 @@ uniform vec3 ParticleColor;
 
 
 void main()
-{
-
-	// Output color = red 
+{	
 	//color = ParticleColor;//vec3(0,0,1);
-	color = texture( ParticleTexture, UV ).rgb + ParticleColor;	
-
+	vec4 ParicleClr = vec4(ParticleColor.r, ParticleColor.g, ParticleColor.b, 0.0f);
+	PixelColor = texture( ParticleTexture, UV ) + ParicleClr;		
 }

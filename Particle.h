@@ -15,7 +15,10 @@ class Particle
 	//Radius of Particle : Since Rectangle is the shape of particle so radius represent 
 	GLfloat			m_fRadius;
 
+	//Color Of Particle
 	glm::vec3		m_vColor;
+
+	glm::vec3		m_vPos;
 
 public:
 	Particle(float _fCenterX, float _fCenterY, float _fCenterZ);
@@ -25,6 +28,7 @@ public:
 	GLuint		GetVertexBuffer();
 	GLuint		GetVertexCount();
 	glm::vec3	GetColor();
+	glm::vec3	GetPosition();
 	void		Release();	
 };
 
