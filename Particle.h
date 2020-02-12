@@ -18,7 +18,14 @@ class Particle
 	//Color Of Particle
 	glm::vec3		m_vColor;
 
+	//Particle Position 
 	glm::vec3		m_vPos;
+
+	//Particle Velocity 
+	glm::vec2		m_vVelocity;
+
+	//Particle Life 
+	float			m_fLife;
 
 public:
 	Particle(float _fCenterX, float _fCenterY, float _fCenterZ);
@@ -28,7 +35,18 @@ public:
 	GLuint		GetVertexBuffer();
 	GLuint		GetVertexCount();
 	glm::vec3	GetColor();
+	
 	glm::vec3	GetPosition();
+	void		SetPosition(glm::vec3 _vNewPos);
+	
+	glm::vec2	GetVelocity();
+	
+	float		GetLife();
+	void		SetLife(float _fNewLife);
+
 	void		Release();	
+
+	float		GetSize();
+	void		SetSize(float _fSize);
 };
 

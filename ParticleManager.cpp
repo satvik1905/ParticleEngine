@@ -230,58 +230,90 @@ ParticleManager::~ParticleManager()
 {
 }
 
-void ParticleManager::Render()
+void ParticleManager::Render(double  _dDelta)
 {	
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glUseProgram(m_ShaderId);
-	for (unsigned int iParticleIndex = 0; iParticleIndex < m_vParticleList.size(); iParticleIndex++)
+	std::vector<Particle *>::iterator itr;
+	for (itr = m_vParticleList.begin(); itr != m_vParticleList.end(); itr++)
 	{
-		auto pParticle = m_vParticleList[iParticleIndex];
-		
-		auto vPos = pParticle->GetPosition();
-
-		
-		//Set MVP in Vertex Shader
-		float fTransX = (rand() % 20)  + (-10);
-		float fTransY = (rand() % 10) + (-5);
-		float fTransZ = (rand() % 5) + 1;
-		glm::mat4 matModel = glm::translate(glm::mat4(1.0f), glm::vec3(vPos.x, vPos.y, vPos.z));
-		//glm::mat4 matModel = glm::mat4(1.0f);
-		glm::mat4 matScale = glm::scale(matModel, glm::vec3(fTransZ, fTransZ, 1));
-
-		glm::mat4 MVP = m_matProj * m_matView * matScale;/**  matModel;*/ ///*matScale;
+		auto pParticle = *itr;
 		glm::vec3 vColor = pParticle->GetColor();
-		glUniform3f(m_ColorID, vColor.r, vColor.g, vColor.b);
-		glUniformMatrix4fv(m_MatrixMVPID, 1, GL_FALSE, &MVP[0][0]);
+		auto vPos = pParticle->GetPosition();
+		auto vSpeed = pParticle->GetVelocity();
+		auto Size = pParticle->GetSize() * 1.05f;
+		auto life = pParticle->GetLife() + (float)_dDelta;
+		vPos.x += vSpeed.x * (float)_dDelta * 0.1;
+		vPos.y += vSpeed.y * (float)_dDelta * 0.1;
 		
-		int iSelectedTexture = rand() % 2 + 1;
+		if (life < 1.25f)
+		{	
+			//Update Particle 
+			pParticle->SetPosition(vPos);
+			pParticle->SetSize(Size);
+			pParticle->SetLife(life);
 
-		//Set Texture
-		glActiveTexture(GL_TEXTURE0);
-		if(iSelectedTexture == 1)
-			glBindTexture(GL_TEXTURE_2D, m_Texture1);		
-		else
-			glBindTexture(GL_TEXTURE_2D, m_Texture2);
-		glUniform1i(m_TextureID, 0);
+
+			//Set MVP in Vertex Shader
+			float fTransX = (rand() % 20)  + (-10);
+			float fTransY = (rand() % 10) + (-5);
+			float fTransZ = (rand() % 5) + 1;
+
+			glm::mat4 matModel = glm::translate(glm::mat4(1.0f), glm::vec3(vPos.x, vPos.y, vPos.z));
+			//glm::mat4 matModel = glm::mat4(1.0f);
+			glm::mat4 matScale = glm::scale(matModel, glm::vec3(Size, Size, 1));
+
+			glm::mat4 MVP = m_matProj * m_matView * matScale;/**  matModel;*/ ///*matScale;
+		
+			glUniform3f(m_ColorID, vColor.r, vColor.g, vColor.b);
+			glUniformMatrix4fv(m_MatrixMVPID, 1, GL_FALSE, &MVP[0][0]);
+		
+
+			//Set Texture
+			glActiveTexture(GL_TEXTURE0);			
+			if(life < 1.0f)
+				glBindTexture(GL_TEXTURE_2D, m_Texture1);
+			else
+				glBindTexture(GL_TEXTURE_2D, m_Texture2);	
+			glUniform1i(m_TextureID, 0);
 			
-		//1 - Set verticex buffer
-		glEnableVertexAttribArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, pParticle->GetVertexBuffer());
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+			//1 - Set verticex buffer
+			glEnableVertexAttribArray(0);
+			glBindBuffer(GL_ARRAY_BUFFER, pParticle->GetVertexBuffer());
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
-		// 2 - Set UVs buffer 
-		glEnableVertexAttribArray(1);
-		glBindBuffer(GL_ARRAY_BUFFER, pParticle->GetTextureUVBuffer());
-		glVertexAttribPointer(1, 2,	GL_FLOAT, GL_FALSE,	0, (void*)0);
+			// 2 - Set UVs buffer 
+			glEnableVertexAttribArray(1);
+			glBindBuffer(GL_ARRAY_BUFFER, pParticle->GetTextureUVBuffer());
+			glVertexAttribPointer(1, 2,	GL_FLOAT, GL_FALSE,	0, (void*)0);
 		
-		glDrawArrays(GL_TRIANGLES, 0, pParticle->GetVertexCount());
+			glDrawArrays(GL_TRIANGLES, 0, pParticle->GetVertexCount());
 		
-		glDisableVertexAttribArray(0);
-		glDisableVertexAttribArray(1);		
+			glDisableVertexAttribArray(0);
+			glDisableVertexAttribArray(1);		
+		}
+		else
+		{
+			//delete Particle		
+			pParticle->Release();
+			itr = m_vParticleList.erase(itr);			
+		}
 	}
 	
+	if (m_vParticleList.size() < 100)
+	{
+		int NewSpawn = (rand() % (5) + (1));
+		for (int i = 0; i < NewSpawn; i++)
+		{
+			float fPosX = ((double)rand() / (RAND_MAX)) + (rand() % (10) + (-5));
+			float fPosY = ((double)rand() / (RAND_MAX)) + (rand() % (10) + (-5));
+			float fPosZ = 0;
+			m_vParticleList.push_back(new Particle(fPosX, fPosY, fPosZ));
+		}
+
+	}
 	
 }
 
@@ -291,10 +323,10 @@ bool ParticleManager::InitializeManager()
 	if (IntializeShader())
 	{
 		//Add 1000 Particle
-		for (unsigned int i = 0; i < 1000; i++)
+		for (unsigned int i = 0; i < 1; i++)
 		{	
-			float fPosX = ((double)rand() / (RAND_MAX)) + (rand()  % (10) + (-5));
-			float fPosY = ((double)rand() / (RAND_MAX)) + (rand() % (10) + (-5));
+			float fPosX = 0;// ((double)rand() / (RAND_MAX)) + (rand() % (10) + (-5));
+			float fPosY = 0;// ((double)rand() / (RAND_MAX)) + (rand() % (10) + (-5));
 			float fPosZ = 0;
 			m_vParticleList.push_back(new Particle(fPosX, fPosY, fPosZ));
 		}

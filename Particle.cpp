@@ -1,8 +1,11 @@
 #include "Particle.h"
 
 Particle::Particle(float _fCenterX, float _fCenterY, float _fCenterZ)
-	:m_fRadius(0.0125f)
-	//:m_fRadius(1.0f)
+	:m_vPos(_fCenterX, _fCenterY, _fCenterZ),
+	 m_vVelocity(0.0f , 5.0f),
+	 m_fLife(0.0f),
+	 m_fRadius(0.125f)	
+	 //m_fRadius(0.5f)
 {
 	const GLfloat pVertices[] = 
 	{
@@ -24,7 +27,7 @@ Particle::Particle(float _fCenterX, float _fCenterY, float _fCenterZ)
 	glBufferData(GL_ARRAY_BUFFER, sizeof(pVertices), pVertices, GL_STATIC_DRAW);
 
 	//Set Particle Color
-	GLfloat clr = 0.5 + ((rand() % 100) / 100.0f); //Not using Now
+	GLfloat clr = 0.5 + ((rand() % 100) / 100.0f); 
 	m_vColor =   glm::vec3((double)rand() / (RAND_MAX), (double)rand() / (RAND_MAX), (double)rand() / (RAND_MAX));
 
 
@@ -44,7 +47,7 @@ Particle::Particle(float _fCenterX, float _fCenterY, float _fCenterZ)
 	glBindBuffer(GL_ARRAY_BUFFER, m_TextureUVBuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(pTextureUV), pTextureUV, GL_STATIC_DRAW);
 
-	m_vPos = glm::vec3(_fCenterX, _fCenterY, _fCenterZ);
+	
 }
 
 Particle::~Particle()
@@ -76,9 +79,39 @@ glm::vec3 Particle::GetPosition()
 	return m_vPos;
 }
 
+void Particle::SetPosition(glm::vec3 _vNewPos)
+{
+	m_vPos = _vNewPos;
+}
+
+glm::vec2 Particle::GetVelocity()
+{
+	return m_vVelocity;
+}
+
+float Particle::GetLife()
+{
+	return m_fLife;
+}
+
+void Particle::SetLife(float _fNewLife)
+{
+	m_fLife = _fNewLife;
+}
+
 void Particle::Release()
 {
 	glDeleteBuffers(1, &m_VB);
 	glDeleteBuffers(1, &m_TextureUVBuffer);
 
+}
+
+float Particle::GetSize()
+{
+	return m_fRadius;
+}
+
+void Particle::SetSize(float _fSize)
+{
+	m_fRadius = _fSize;
 }

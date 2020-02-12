@@ -4,5 +4,16 @@ Primary Goal
 	B-) Mapped the Texture Coordinate
 	
 2- Animation : Constantly increase the size of Particle and swapping the texture 
+	A-) Increasing Y-Component of position of every particles on every rendering tick
+	B-) Life of Particles increse on every rendering tick
+	C-) Particle destroyed on crossing life spam of 1.25 sec
+	D-) Particle has fire texture upto 1.0sec after that smoke texture
 
-3- Load Two Textures : During Rendering of Particle, swapping the texture
+3- Load Two Textures : During Rendering of Particles, swapping the texture
+
+
+Secondary Goal
+1- Spawning and Destroying
+	A-) Random number of particles are added in the particle pool
+	B-) If particle count goes below 100, more particles add in pool
+	C-) Life of every particle is 1.25sec after that it destroyed	

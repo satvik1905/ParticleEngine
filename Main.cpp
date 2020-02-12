@@ -29,16 +29,20 @@ int main()
 	glDepthFunc(GL_LESS);
 	
 	
-	
+	double lastTime = glfwGetTime();
 	//Infinite Loop
 	while (!glfwWindowShouldClose(pWindow->GetWindowHandle()))
 	{
+		double currentTime = glfwGetTime();
+		double Tick = currentTime - lastTime;
+		lastTime = currentTime;
+
 		if (glfwGetKey(pWindow->GetWindowHandle(), GLFW_KEY_ESCAPE) == GLFW_PRESS)
 			glfwSetWindowShouldClose(pWindow->GetWindowHandle(), true);
 					
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 				
-		pParticleManager->Render();
+		pParticleManager->Render(Tick);
 		
 		glfwSwapBuffers(pWindow->GetWindowHandle());
 		glfwPollEvents();

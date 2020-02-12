@@ -33,7 +33,7 @@ public:
 	ParticleManager();
 	~ParticleManager();
 	
-	void Render();
+	void Render(double _dDelta);
 	bool InitializeManager();
 	void Release();
 	GLuint GetShaderId();
