@@ -58,30 +58,8 @@ int main()
 			bSetColor = (bSetColor == true) ? false : true;
 					
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		//ViewPort Coordinate
-		double xPos = 0.0f, yPos = 0.0f;
-		glfwGetCursorPos(pWindow->GetWindowHandle(), &xPos, &yPos);
-		printf("\nMousePos (%f, %f)", xPos, yPos);
 				
-		//Normalize Coordinate
-		double ScreenW = 600.0f, ScreenH = 400.0f;
-		double xNormalize = (2.0f * xPos) / ScreenW - 1;
-		double yNormalize = (2.0f * yPos) / ScreenH - 1;
-
-		//Homogenious Clip Space
-		glm::vec4 clipCoordinate = glm::vec4(xNormalize, yNormalize, -1.0f, 1.0f);
-		
-		glm::mat4 matInverseViewProj = glm::inverse(matProj * matView);
-				
-		glm::vec4 worldPos = clipCoordinate * matInverseViewProj;
-		
-		worldPos.w = 1 / worldPos.w;
-		worldPos.x *= worldPos.w;
-		worldPos.y *= worldPos.w;
-		worldPos.z *= worldPos.w;
-				
-		pParticleManager->Render(Tick, bSetColor, glm::vec3(worldPos.x, worldPos.y, worldPos.z), matView, matProj);
+		pParticleManager->Render(Tick, bSetColor, matView, matProj);
 		
 		glfwSwapBuffers(pWindow->GetWindowHandle());
 		glfwPollEvents();

@@ -229,7 +229,7 @@ ParticleManager::~ParticleManager()
 {
 }
 
-void ParticleManager::Render(double  _dDelta, bool _bColor, glm::vec3 _vWorldPos, glm::mat4 _matView, glm::mat4 _matProj)
+void ParticleManager::Render(double  _dDelta, bool _bColor, glm::mat4 _matView, glm::mat4 _matProj)
 {	
 	//Update Particle Pool
 	UpdateParticleCount();

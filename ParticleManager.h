@@ -34,7 +34,7 @@ public:
 	ParticleManager();
 	~ParticleManager();
 	
-	void Render(double _dDelta, bool _bColor, glm::vec3 _vWorldPos,  glm::mat4 _matView, glm::mat4 _matProj);
+	void Render(double _dDelta, bool _bColor,  glm::mat4 _matView, glm::mat4 _matProj);
 	bool InitializeManager();
 	void Release();
 	GLuint GetShaderId();
