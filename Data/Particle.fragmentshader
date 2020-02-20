@@ -11,9 +11,14 @@ out vec4 PixelColor;
 uniform sampler2D ParticleTexture;
 
 uniform vec3 ParticleColor;
+uniform bool IsColorSet;
 
 
 void main()
 {	
-	PixelColor = texture( ParticleTexture, UV );
+	vec4 vTexColor = texture( ParticleTexture, UV );
+	if(IsColorSet)
+		PixelColor = vec4(vTexColor.rgb + ParticleColor, vTexColor.a);
+	else
+		PixelColor = vTexColor;
 }

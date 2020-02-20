@@ -4,7 +4,7 @@
 #include <fstream>
 #include <sstream>
 #include <time.h> //For Random Number Generator
-
+#include <algorithm>
 #include "GLFW/glfw3.h"
 
 #define FOURCC_DXT1 0x31545844 // Equivalent to "DXT1" in ASCII
@@ -99,6 +99,9 @@ bool ParticleManager::IntializeShader()
 	// Get a handle for our "TextureSampler" uniform
 	m_TextureID = glGetUniformLocation(m_ShaderId, "ParticleTexture");
 
+	// Get a handle for our "IsColorSet" uniform
+	m_IsColorSetID = glGetUniformLocation(m_ShaderId, "IsColorSet");
+
 
 	// delete the shaders as they're linked into our program now and no longer necessery
 	glDeleteShader(vertexShaderId);
@@ -111,14 +114,11 @@ GLuint ParticleManager::LoadTexture(const char * _pFilePath)
 {
 	unsigned char header[124];
 
-	FILE *fp;
-
-	/* try to open the file */
+	FILE *fp = nullptr;	
 	fopen_s(&fp, _pFilePath, "rb");
-	if (fp == NULL) {
-		printf("%s could not be opened. Are you in the right directory ? Don't forget to read the FAQ !\n", _pFilePath); getchar();
+	if (fp == NULL) 
 		return 0;
-	}
+	
 
 	/* verify the type of file */
 	char filecode[4];
@@ -128,9 +128,8 @@ GLuint ParticleManager::LoadTexture(const char * _pFilePath)
 		return 0;
 	}
 
-	/* get the surface desc */
+	
 	fread(&header, 124, 1, fp);
-
 	unsigned int height = *(unsigned int*)&(header[8]);
 	unsigned int width = *(unsigned int*)&(header[12]);
 	unsigned int linearSize = *(unsigned int*)&(header[16]);
@@ -139,12 +138,10 @@ GLuint ParticleManager::LoadTexture(const char * _pFilePath)
 
 
 	unsigned char * buffer;
-	unsigned int bufsize;
-	/* how big is it going to be including all mipmaps? */
+	unsigned int bufsize;	
 	bufsize = mipMapCount > 1 ? linearSize * 2 : linearSize;
 	buffer = (unsigned char*)malloc(bufsize * sizeof(unsigned char));
-	fread(buffer, 1, bufsize, fp);
-	/* close the file pointer */
+	fread(buffer, 1, bufsize, fp);	
 	fclose(fp);
 
 	unsigned int components = (fourCC == FOURCC_DXT1) ? 3 : 4;
@@ -169,7 +166,6 @@ GLuint ParticleManager::LoadTexture(const char * _pFilePath)
 	GLuint textureID;
 	glGenTextures(1, &textureID);
 
-	// "Bind" the newly created texture : all future texture functions will modify this texture
 	glBindTexture(GL_TEXTURE_2D, textureID);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
@@ -191,7 +187,7 @@ GLuint ParticleManager::LoadTexture(const char * _pFilePath)
 		width /= 2;
 		height /= 2;
 
-		// Deal with Non-Power-Of-Two textures. This code is not included in the webpage to reduce clutter.
+		
 		if (width < 1) width = 1;
 		if (height < 1) height = 1;
 
@@ -204,13 +200,27 @@ GLuint ParticleManager::LoadTexture(const char * _pFilePath)
 
 }
 
+void ParticleManager::UpdateParticleCount()
+{
+	if (m_vParticleList.size() < 100)
+	{
+		int NewSpawn = (rand() % (5) + (1));
+		for (int i = 0; i < NewSpawn; i++)
+		{
+			float fPosX = ((double)rand() / (RAND_MAX)) + (rand() % (10) + (-5));
+			float fPosY = ((double)rand() / (RAND_MAX)) + (rand() % (5) + (-5));
+			float fPosZ = 0;
+			m_vParticleList.push_back(new Particle(fPosX, fPosY, fPosZ));
+		}
+
+	}
+}
+
 ParticleManager::ParticleManager()
 {
 	/* initialize random seed: */
 	//Only Once : Random Value Use to Generate Particle Position
-	srand(time(NULL)); 
-
-	
+	srand(time(NULL)); 	
 }
 
 
@@ -219,8 +229,11 @@ ParticleManager::~ParticleManager()
 {
 }
 
-void ParticleManager::Render(double  _dDelta, glm::vec3 _vWorldPos, glm::mat4 _matView, glm::mat4 _matProj)
+void ParticleManager::Render(double  _dDelta, bool _bColor, glm::vec3 _vWorldPos, glm::mat4 _matView, glm::mat4 _matProj)
 {	
+	//Update Particle Pool
+	UpdateParticleCount();
+
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -238,36 +251,31 @@ void ParticleManager::Render(double  _dDelta, glm::vec3 _vWorldPos, glm::mat4 _m
 		vPos.y += vSpeed.y * (float)_dDelta * 0.1;		
 		
 
-		if (life < 2.0f)
+		if (life < m_fMAX_LIFE)
 		{	
-			if (life < 1.8f)
-				Size += (float)_dDelta * 0.05;
+			if (life < m_fTex1Life)
+				Size += (float)_dDelta * 0.02;
 			else
 				Size += (float)_dDelta * 0.1;
+			
 			//Update Particle 
 			pParticle->SetPosition(vPos);
 			pParticle->SetSize(Size);
 			pParticle->SetLife(life);
 
-
-			//Set MVP in Vertex Shader
-			float fTransX = (rand() % 20)  + (-10);
-			float fTransY = (rand() % 10) + (-5);
-			float fTransZ = (rand() % 5) + 1;
-
 			glm::mat4 matModel = glm::translate(glm::mat4(1.0f), glm::vec3(vPos.x, vPos.y, vPos.z));
-			//glm::mat4 matModel = glm::mat4(1.0f);
-			glm::mat4 matScale = glm::scale(matModel, glm::vec3(Size, Size, 1));
+			glm::mat4 matTransform = glm::scale(matModel, glm::vec3(Size, Size, 1));
 
-			glm::mat4 MVP = _matProj * _matView * matScale;/**  matModel;*/ ///*matScale;
+			glm::mat4 MVP = _matProj * _matView * matTransform;
 		
 			glUniform3f(m_ColorID, vColor.r, vColor.g, vColor.b);
 			glUniformMatrix4fv(m_MatrixMVPID, 1, GL_FALSE, &MVP[0][0]);
-		
+			glUniform1i(m_IsColorSetID, _bColor);			
+
 
 			//Set Texture
 			glActiveTexture(GL_TEXTURE0);			
-			if(life < 1.8f)
+			if(life < m_fTex1Life)
 				glBindTexture(GL_TEXTURE_2D, m_Texture1);
 			else
 				glBindTexture(GL_TEXTURE_2D, m_Texture2);	
@@ -296,19 +304,6 @@ void ParticleManager::Render(double  _dDelta, glm::vec3 _vWorldPos, glm::mat4 _m
 		}
 	}
 	
-	if (m_vParticleList.size() < 100)
-	{
-		int NewSpawn = (rand() % (5) + (1));
-		for (int i = 0; i < NewSpawn; i++)
-		{
-			float fPosX = ((double)rand() / (RAND_MAX)) + (rand() % (10) + (-5));
-			float fPosY = ((double)rand() / (RAND_MAX)) + (rand() % (5) + (-5));
-			float fPosZ = 0;
-			m_vParticleList.push_back(new Particle(fPosX, fPosY, fPosZ));
-		}
-
-	}
-	
 }
 
 bool ParticleManager::InitializeManager()
@@ -316,14 +311,8 @@ bool ParticleManager::InitializeManager()
 	//Intialize Shader
 	if (IntializeShader())
 	{
-		//Add 1000 Particle
-		for (unsigned int i = 0; i < 1; i++)
-		{	
-			float fPosX = 0;// ((double)rand() / (RAND_MAX)) + (rand() % (10) + (-5));
-			float fPosY = 0;// ((double)rand() / (RAND_MAX)) + (rand() % (10) + (-5));
-			float fPosZ = 0;
-			m_vParticleList.push_back(new Particle(fPosX, fPosY, fPosZ));
-		}
+		//Add a particle
+		m_vParticleList.push_back(new Particle(0.0f, 0.0f, 0.0f));
 
 		//LoadTexture		
 		m_Texture1 = LoadTexture(".\\Data\\Textures\\fire.dds");

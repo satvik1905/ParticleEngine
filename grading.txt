@@ -17,3 +17,6 @@ Secondary Goal
 	A-) Random number of particles are added in the particle pool
 	B-) If particle count goes below 100, more particles add in pool
 	C-) Life of every particle is 1.25sec after that it destroyed	
+	
+2- KeyBoardEvent 
+	A-) Apply Color On the Particle OnKeyBoard(SHIFT + 'C') Event

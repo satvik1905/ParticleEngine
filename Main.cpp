@@ -8,7 +8,7 @@ int main()
 {
 	//Intialize the Window
 	RenderWindow *pWindow = new RenderWindow();
-	bool bResultValue = pWindow->CreateRenderWindow(600, 400, "ParticleEngine", false); //Set Last Paramter false to Normal Window Size
+	bool bResultValue = pWindow->CreateRenderWindow(600, 400, "ParticleEngine", true); //Set Last Paramter false to Normal Window Size
 	if (!bResultValue)
 		return 0;
 	
@@ -34,7 +34,7 @@ int main()
 	//Set Projection Matrix
 	int count = 0;
 	const GLFWvidmode *pScreen = glfwGetVideoModes(glfwGetPrimaryMonitor(), &count);
-	float fAspectRatio = 600.0f / 400.0f; //(float)pScreen->width / (float)pScreen->height;
+	float fAspectRatio = (float)pScreen->width / (float)pScreen->height;//600.0f / 400.0f; //
 	glm::mat4 matProj = glm::perspective(glm::radians(60.0f), fAspectRatio, 0.1f, 10000.0f);
 		
 	
@@ -43,7 +43,7 @@ int main()
 	glDepthFunc(GL_LESS);
 	
 	
-	double lastTime = glfwGetTime();
+	double lastTime = glfwGetTime(); bool bSetColor = false;
 	//Infinite Loop
 	while (!glfwWindowShouldClose(pWindow->GetWindowHandle()))
 	{
@@ -53,6 +53,9 @@ int main()
 
 		if (glfwGetKey(pWindow->GetWindowHandle(), GLFW_KEY_ESCAPE) == GLFW_PRESS)
 			glfwSetWindowShouldClose(pWindow->GetWindowHandle(), true);
+
+		if (glfwGetKey(pWindow->GetWindowHandle(), GLFW_KEY_C) == GLFW_PRESS)
+			bSetColor = (bSetColor == true) ? false : true;
 					
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -78,7 +81,7 @@ int main()
 		worldPos.y *= worldPos.w;
 		worldPos.z *= worldPos.w;
 				
-		pParticleManager->Render(Tick, glm::vec3(worldPos.x, worldPos.y, worldPos.z), matView, matProj);
+		pParticleManager->Render(Tick, bSetColor, glm::vec3(worldPos.x, worldPos.y, worldPos.z), matView, matProj);
 		
 		glfwSwapBuffers(pWindow->GetWindowHandle());
 		glfwPollEvents();

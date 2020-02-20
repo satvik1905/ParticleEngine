@@ -4,8 +4,7 @@ Particle::Particle(float _fCenterX, float _fCenterY, float _fCenterZ)
 	:m_vPos(_fCenterX, _fCenterY, _fCenterZ),
 	 m_vVelocity(0.0f , 5.0f),
 	 m_fLife(0.0f),
-	 m_fRadius(0.125f)	
-	 //m_fRadius(0.5f)
+	 m_fRadius(0.125f)		 
 {
 	const GLfloat pVertices[] = 
 	{
@@ -45,9 +44,7 @@ Particle::Particle(float _fCenterX, float _fCenterY, float _fCenterZ)
 	};
 	glGenBuffers(1, &m_TextureUVBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, m_TextureUVBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(pTextureUV), pTextureUV, GL_STATIC_DRAW);
-
-	
+	glBufferData(GL_ARRAY_BUFFER, sizeof(pTextureUV), pTextureUV, GL_STATIC_DRAW);	
 }
 
 Particle::~Particle()

@@ -48,5 +48,10 @@ public:
 
 	float		GetSize();
 	void		SetSize(float _fSize);
+
+	bool operator<(const Particle& that) const {
+		// Sort in reverse order : bigger particles drawn first.
+		return this->m_fRadius > that.m_fRadius;
+	}
 };
 
