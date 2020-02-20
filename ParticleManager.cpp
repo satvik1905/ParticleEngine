@@ -210,18 +210,7 @@ ParticleManager::ParticleManager()
 	//Only Once : Random Value Use to Generate Particle Position
 	srand(time(NULL)); 
 
-	//Set View Matrix
-	glm::vec3 vCameraPos = glm::vec3(0, 0, -3);
-	glm::vec3 vCameraDir = glm::vec3(0, 0, 1);
-	glm::vec3 vUp		 = glm::vec3(0, 1, 0);
-	m_matView = glm::lookAt(vCameraPos, vCameraDir, vUp);
-
 	
-	int count = 0;
-	const GLFWvidmode *pScreen = glfwGetVideoModes(glfwGetPrimaryMonitor(), &count);
-	float fAspectRatio = (float) pScreen->width / (float)pScreen->height;
-	//Set Projection Matrix
-	m_matProj = glm::perspective(glm::radians(60.0f), fAspectRatio, 0.1f, 10000.0f);
 }
 
 
@@ -230,7 +219,7 @@ ParticleManager::~ParticleManager()
 {
 }
 
-void ParticleManager::Render(double  _dDelta)
+void ParticleManager::Render(double  _dDelta, glm::vec3 _vWorldPos, glm::mat4 _matView, glm::mat4 _matProj)
 {	
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -243,13 +232,18 @@ void ParticleManager::Render(double  _dDelta)
 		glm::vec3 vColor = pParticle->GetColor();
 		auto vPos = pParticle->GetPosition();
 		auto vSpeed = pParticle->GetVelocity();
-		auto Size = pParticle->GetSize() * 1.05f;
+		auto Size = pParticle->GetSize();
 		auto life = pParticle->GetLife() + (float)_dDelta;
 		vPos.x += vSpeed.x * (float)_dDelta * 0.1;
-		vPos.y += vSpeed.y * (float)_dDelta * 0.1;
+		vPos.y += vSpeed.y * (float)_dDelta * 0.1;		
 		
-		if (life < 1.25f)
+
+		if (life < 2.0f)
 		{	
+			if (life < 1.8f)
+				Size += (float)_dDelta * 0.05;
+			else
+				Size += (float)_dDelta * 0.1;
 			//Update Particle 
 			pParticle->SetPosition(vPos);
 			pParticle->SetSize(Size);
@@ -265,7 +259,7 @@ void ParticleManager::Render(double  _dDelta)
 			//glm::mat4 matModel = glm::mat4(1.0f);
 			glm::mat4 matScale = glm::scale(matModel, glm::vec3(Size, Size, 1));
 
-			glm::mat4 MVP = m_matProj * m_matView * matScale;/**  matModel;*/ ///*matScale;
+			glm::mat4 MVP = _matProj * _matView * matScale;/**  matModel;*/ ///*matScale;
 		
 			glUniform3f(m_ColorID, vColor.r, vColor.g, vColor.b);
 			glUniformMatrix4fv(m_MatrixMVPID, 1, GL_FALSE, &MVP[0][0]);
@@ -273,7 +267,7 @@ void ParticleManager::Render(double  _dDelta)
 
 			//Set Texture
 			glActiveTexture(GL_TEXTURE0);			
-			if(life < 1.0f)
+			if(life < 1.8f)
 				glBindTexture(GL_TEXTURE_2D, m_Texture1);
 			else
 				glBindTexture(GL_TEXTURE_2D, m_Texture2);	
@@ -308,7 +302,7 @@ void ParticleManager::Render(double  _dDelta)
 		for (int i = 0; i < NewSpawn; i++)
 		{
 			float fPosX = ((double)rand() / (RAND_MAX)) + (rand() % (10) + (-5));
-			float fPosY = ((double)rand() / (RAND_MAX)) + (rand() % (10) + (-5));
+			float fPosY = ((double)rand() / (RAND_MAX)) + (rand() % (5) + (-5));
 			float fPosZ = 0;
 			m_vParticleList.push_back(new Particle(fPosX, fPosY, fPosZ));
 		}

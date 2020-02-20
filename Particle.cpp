@@ -10,14 +10,14 @@ Particle::Particle(float _fCenterX, float _fCenterY, float _fCenterZ)
 	const GLfloat pVertices[] = 
 	{
 		//First Triangle
-		  - m_fRadius,   - m_fRadius, 0,
-		  + m_fRadius,   - m_fRadius, 0,
-		  + m_fRadius,   + m_fRadius, 0,
+		  - 1.0f,   - 1.0f, 0,
+		  + 1.0f,   - 1.0f, 0,
+		  + 1.0f,   + 1.0f, 0,
 
 		 //Second Triangle
-		  + m_fRadius,   + m_fRadius, 0,
-		  - m_fRadius,   + m_fRadius, 0,
-		  - m_fRadius,   - m_fRadius, 0,
+		  + 1.0f,   + 1.0f, 0,
+		  - 1.0f,   + 1.0f, 0,
+		  - 1.0f,   - 1.0f, 0,
 	};
 	m_VertexCount = 6;
 

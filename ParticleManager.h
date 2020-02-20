@@ -14,7 +14,6 @@ class ParticleManager
 {	
 	//std::vector< GLuint >		m_vTextureIDList;
 	std::vector<Particle *>		m_vParticleList;
-	glm::mat4	m_matView, m_matProj;
 	
 
 private :
@@ -33,7 +32,7 @@ public:
 	ParticleManager();
 	~ParticleManager();
 	
-	void Render(double _dDelta);
+	void Render(double _dDelta, glm::vec3 _vWorldPos,  glm::mat4 _matView, glm::mat4 _matProj);
 	bool InitializeManager();
 	void Release();
 	GLuint GetShaderId();
